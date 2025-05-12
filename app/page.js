@@ -15,7 +15,7 @@ export default function Home() {
 
         <main className="mx-auto max-w-4xl">
           <section className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold tracking-tight md:text-5xl">Feature-based Prediction</h2>
+            <h2 className="mb-3 text-4xl font-bold tracking-tight md:text-5xl">{process.env.NEXT_PUBLIC_TITLE}</h2>
             <p className="mx-auto mb-8 max-w-2xl text-muted-foreground md:text-lg">
               Input numeric features or upload an image to get predictions from our advanced machine learning model.
             </p>
