@@ -11,6 +11,8 @@ import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { processFeatures, processImage } from "@/app/actions"
 import { cn } from "@/lib/utils"
+import axios from "axios"
+
 
 export function UserInputForm() {
   const [results, setResults] = useState(null)
@@ -73,39 +75,27 @@ export function UserInputForm() {
   }
 
   const onSubmit = async () => {
-    setIsLoading(true)
+    const url = process.env.NEXT_PUBLIC_API_URL;
+    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+    
+    const data = {
+      "features": features
+    }
+
     try {
-      let data = null
-
-      if (inputMethod === "manual") {
-        data = await processFeatures({
-          features,
-          options: useAdvancedOptions ? { threshold } : undefined,
-        })
-      } else if (inputMethod === "json") {
-        try {
-          const parsed = JSON.parse(jsonInput)
-          data = await processFeatures({
-            features: parsed.features,
-            options: useAdvancedOptions ? { threshold } : undefined,
-          })
-        } catch (e) {
-          setJsonError("Failed to parse JSON")
-          setIsLoading(false)
-          return
+      const response = await axios.post(url, data, {
+        headers: {
+          'x-api-key': apiKey,
+          'Content-Type': 'application/json'
         }
-      } else if (inputMethod === "image" && selectedImage) {
-        data = await processImage({
-          image: selectedImage,
-          options: useAdvancedOptions ? { threshold } : undefined,
-        })
-      }
+      });
 
-      setResults(data)
-    } catch (err) {
-      console.error("Error processing data:", err)
-    } finally {
-      setIsLoading(false)
+      console.log('Response:', response.data.prediction[0]);
+      setResults(response.data.prediction[0]);
+      return response.data;
+    } catch (error) {
+      console.error('Error making POST request:', error.response?.data || error.message);
+      throw error;
     }
   }
 
@@ -266,22 +256,22 @@ export function UserInputForm() {
                     <div className="rounded-lg bg-muted p-4">
                       <h4 className="mb-2 font-medium">Prediction</h4>
                       <div className="flex items-center justify-between">
-                        <span className="text-3xl font-bold">{results.prediction.label}</span>
-                        <span className="text-xl font-medium">{(results.prediction.confidence * 100).toFixed(2)}%</span>
+                        <span className="text-3xl font-bold">{results}</span>
+                        {/* <span className="text-xl font-medium">{(results.prediction.confidence * 100).toFixed(2)}%</span> */}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="rounded-lg bg-muted p-4">
                         <h5 className="text-sm font-medium">Processing Time</h5>
-                        <p className="text-2xl font-bold">{results.metadata.processingTime}ms</p>
+                        {/* <p className="text-2xl font-bold">{results.metadata.processingTime}ms</p> */}
                       </div>
                       <div className="rounded-lg bg-muted p-4">
                         <h5 className="text-sm font-medium">Model</h5>
-                        <p className="text-lg font-bold">{results.metadata.model}</p>
+                        {/* <p className="text-lg font-bold">{results.metadata.model}</p> */}
                       </div>
                     </div>
                   </TabsContent>
-                  <TabsContent value="details" className="mt-4">
+                  {/* <TabsContent value="details" className="mt-4">
                     <div className="space-y-4">
                       <div className="rounded-lg bg-muted p-4">
                         <h4 className="mb-2 font-medium">Feature Importance</h4>
@@ -309,7 +299,7 @@ export function UserInputForm() {
                         </pre>
                       </div>
                     </div>
-                  </TabsContent>
+                  </TabsContent> */}
                 </Tabs>
               </div>
             ) : (
